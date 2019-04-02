@@ -1,0 +1,50 @@
+
+#include <18f4620.h>
+#fuses HS, NOFCMEN, NOIESO, PUT, NOBROWNOUT, NOWDT
+#fuses NOPBADEN, MCLR, STVREN, NOLVP, NODEBUG
+#USE DELAY (clock=4000)
+void main(void) 
+{
+    set_tris_c(0x00);//puerto de salida
+    set_tris_d(0x00);//puerto de salida
+    set_tris_b(0xff);//puerto de entrada
+    int16 conteo;//variable del contador
+    while (TRUE)
+    {
+        if((input(PIN_B0)==0)&&(input(PIN_B1)==0))
+        {
+            output_d(0x00);
+            output_c(0x00);
+        }
+        else if((input(PIN_B0)==0)&&(input(PIN_B1)==1))
+        {
+            for(conteo=1;conteo>=32768;conteo*=2)
+            {
+                int8 valoralto = conteo>>8;
+                output_d(conteo);
+                output_c(valoralto);
+                delay_ms(200);
+            }
+        }
+        else if((input(PIN_B0)==1)&&(input(PIN_B1)==0))
+        {
+            for(conteo=32768;conteo<=1;conteo/=2)
+            {
+                int8 valoralto = conteo>>8;
+                output_d(conteo);
+                output_c(valoralto);
+                delay_ms(200);
+            }
+        }
+        else if((input(PIN_B0)==1)&&(input(PIN_B1)==1))
+        {
+            int8 valor = input_d();
+            int parpadeo = valor>>2;
+            for(int regreso=1;regreso<=parpadeo;parpadeo++)
+            {
+                output_c(parpadeo); 
+            }
+            
+        }
+    }
+}
